@@ -43,10 +43,8 @@ public class AccountService {
         if (existingAccount.isPresent())
         {
             Account account = existingAccount.get();
-            // Update fields as needed (e.g., name, email)
             account.setName(updatedAccount.getName());
             account.setEmail(updatedAccount.getEmail());
-            // Do not update password directly to avoid hashing issues
             return accountRepository.save(account);
         }
         return null;
@@ -57,14 +55,11 @@ public class AccountService {
         if (existingAccount.isPresent())
         {
             Account account = existingAccount.get();
-            // Update only the modified fields
-            if (updatedAccount.getName() != null) {
-                account.setName(updatedAccount.getName());
+            if (validatePassword(updatedAccount.getPassword())) {
+                account.setPassword(PasswordUtil.hashPassword(updatedAccount.getPassword()));
+                return accountRepository.save(account);
             }
-            if (updatedAccount.getEmail() != null) {
-                account.setEmail(updatedAccount.getEmail());
-            }
-            return accountRepository.save(account);
+            throw new IllegalArgumentException("Invalid password");
         }
         return null;
     }
